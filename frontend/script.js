@@ -1,4 +1,3 @@
-
 const API = "http://127.0.0.1:8000/ai";
 let currentUrls = [];
 let currentIndex = 0;
@@ -10,7 +9,7 @@ async function sendMessage() {
 
     appendMessage(text, "user");
     input.value = "";
-    const botMsg = appendMessage("⚡ Scanning Global Networks...", "bot");
+    const botMsg = appendMessage("⚡ Processing Intent...", "bot");
 
     try {
         const res = await fetch(API, {
@@ -23,12 +22,15 @@ async function sendMessage() {
         currentUrls = data.urls;
         currentIndex = 0;
         botMsg.innerHTML = `<div class="bubble">${data.reply}</div>`;
+        
+        // Final Conditions: Voice + Sale Alert + Auto Open
         speak(data.reply);
-
         if (data.is_sale) showSaleNotification();
         if (currentUrls.length > 0) navigateToNext();
 
-    } catch (e) { botMsg.innerText = "Error: Check FastAPI/Ollama."; }
+    } catch (e) { 
+        botMsg.innerText = "Connection Failed. Is FastAPI & Ollama running?"; 
+    }
 }
 
 function navigateToNext() {
@@ -37,7 +39,7 @@ function navigateToNext() {
         currentIndex++;
         document.getElementById("satisfactionBar").style.display = "block";
     } else {
-        appendMessage("No more platforms found for this query.", "bot");
+        appendMessage("Global scan complete. No more sites for this sector.", "bot");
         document.getElementById("satisfactionBar").style.display = "none";
     }
 }
@@ -55,12 +57,22 @@ function appendMessage(text, who) {
 function speak(t) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
-    u.lang = "en-IN";
+    u.lang = "en-IN"; 
     window.speechSynthesis.speak(u);
 }
 
 function showSaleNotification() {
     const n = document.getElementById("saleNote");
     n.style.display = "block";
-    setTimeout(() => n.style.display = "none", 5000);
+    setTimeout(() => n.style.display = "none", 6000);
+}
+
+// Voice Recognition
+function startVoice() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.onresult = (event) => {
+        document.getElementById("msg").value = event.results[0][0].transcript;
+        sendMessage();
+    };
+    recognition.start();
 }
