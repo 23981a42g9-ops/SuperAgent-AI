@@ -10,7 +10,7 @@ async function sendMessage() {
 
     appendMessage(text, "user");
     input.value = "";
-    const botMsg = appendMessage("⚡ Scanning Global Networks...", "bot");
+    const botMsg = appendMessage("⚡ AI is thinking... (Initializing GPU)", "bot");
 
     try {
         const res = await fetch(API, {
@@ -26,16 +26,14 @@ async function sendMessage() {
         currentUrls = data.urls || [];
         currentIndex = 0;
         
-        // Update Bot UI
         botMsg.innerHTML = `<div class="bubble">${data.reply}</div>`;
         
-        // EXECUTE CONDITIONS
         speak(data.reply);
         if (data.is_sale) showSaleNotification();
         if (currentUrls.length > 0) navigateToNext();
 
     } catch (e) { 
-        botMsg.innerText = "Connection Error: Ensure Uvicorn is running on Port 8000.";
+        botMsg.innerText = "Connection Error: Ensure Uvicorn and Ollama are running.";
         console.error(e);
     }
 }
@@ -45,13 +43,12 @@ function navigateToNext() {
     if (currentIndex < currentUrls.length) {
         window.open(currentUrls[currentIndex], "_blank");
         currentIndex++;
-        // Show the satisfaction bar if there are more links available
         const sBar = document.getElementById("satisfactionBar");
         if(sBar) sBar.style.display = "block";
     } else {
         const sBar = document.getElementById("satisfactionBar");
         if(sBar) sBar.style.display = "none";
-        appendMessage("Maximum global platforms reached for this search.", "bot");
+        appendMessage("Maximum results reached.", "bot");
     }
 }
 
@@ -66,12 +63,12 @@ function appendMessage(text, who) {
     return div;
 }
 
-// 4. VOICE SYNTHESIS (Supersonic Voice)
+// 4. VOICE SYNTHESIS
 function speak(t) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
-    u.lang = "en-IN"; // Indian English Accent
-    u.rate = 1.1;     // Slightly faster "Supersonic" speed
+    u.lang = "en-IN";
+    u.rate = 1.1;
     window.speechSynthesis.speak(u);
 }
 
@@ -84,33 +81,30 @@ function showSaleNotification() {
     }
 }
 
-// 6. VOICE RECOGNITION (MIC)
+// 6. VOICE MIC
 function startVoice() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Voice recognition not supported in this browser.");
-        return;
-    }
-    const recognition = new SpeechRecognition();
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.onresult = (e) => {
-        const transcript = e.results[0][0].transcript;
-        document.getElementById("msg").value = transcript;
+        document.getElementById("msg").value = e.results[0][0].transcript;
         sendMessage();
     };
     recognition.start();
 }
 
-// 7. REAL-TIME BACKEND STATUS CHECKER
+// 7. STATUS CHECKER
 setInterval(async () => {
     try {
         const response = await fetch("http://127.0.0.1:8000/");
-        // Update any element showing status (e.g., a span or header)
-        const statusDisplay = document.body.innerText.includes("Backend:") ? true : false;
-        if (response.ok) {
-            console.log("SuperAgent Backend: Connected");
-            // If you have a specific 'offline' text in HTML, you can target it here
+        const statusSpan = document.getElementById("status");
+        if (response.ok && statusSpan) {
+            statusSpan.innerText = "online";
+            statusSpan.style.color = "#00ff00";
         }
     } catch (e) {
-        console.warn("SuperAgent Backend: Disconnected");
+        const statusSpan = document.getElementById("status");
+        if(statusSpan) {
+            statusSpan.innerText = "offline";
+            statusSpan.style.color = "#ff4444";
+        }
     }
-}, 5000);
+}, 3000);
