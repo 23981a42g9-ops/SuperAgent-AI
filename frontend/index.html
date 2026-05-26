@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SuperAgent — Voice AI Agent</title>
-<link rel="stylesheet" href="style.css">
+    <title>SuperAgent Supersonic</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>SuperAgent — Voice AI Agent</header>
-
-<div id="status">Backend: checking...</div>
-<div id="info">Details present: No</div>
-
-<div id="chatContainer">
-  <div id="chat"></div>
-  <div id="offers"></div>
-  <div id="controls">
-    <input type="text" id="msg" placeholder="Type your message..." />
-    <button id="sendBtn">Send</button>
-    <button id="micBtn">🎤</button>
-  </div>
-</div>
-
-<script src="script.js"></script>
+    <div id="saleNote">🔥 LOW-COST SALES DETECTED!</div>
+    <header>SUPERSONIC GLOBAL AI AGENT</header>
+    <div id="chatContainer">
+        <div id="satisfactionBar" onclick="navigateToNext()">
+            Not satisfied? Try Next Global Platform ➔
+        </div>
+        <div id="chat"></div>
+        <div id="controls">
+            <button id="micBtn">🎤</button>
+            <input type="text" id="msg" placeholder="Book movies, find cheap groceries, or search district deals...">
+            <button onclick="sendMessage()">EXECUTE</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
