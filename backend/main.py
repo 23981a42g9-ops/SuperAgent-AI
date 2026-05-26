@@ -40,23 +40,33 @@ async def process_ai(request: Request):
     
     prompt = f"""
     Analyze: "{user_input}"
-    JSON ONLY: {{"sector": "food/grocery/shopping/travel/movies/emergency/district/temples", "query": "item", "reply": "voice text", "is_sale": true/false}}
+    JSON ONLY: {{"sector": "food/travel/shopping/grocery/movies", "query": "search term", "reply": "short voice response", "is_sale": false}}
     """
     
     try:
-        res = ollama.generate(model="llama3", prompt=prompt, format='json')
-        data = json.loads(res['response'])
+        # Use a direct client call to avoid library timeouts
+        from ollama import Client
+        client = Client(host='http://127.0.0.1:11434')
+        res = client.generate(model="llama3", prompt=prompt, format='json')
         
+        data = json.loads(res['response'])
         sector = data.get('sector', 'shopping')
         query = data.get('query', user_input)
+        
         raw_urls = SECTOR_MAP.get(sector, ["https://www.google.com/search?q={q}"])
         final_urls = [u.format(q=urllib.parse.quote(query)) for u in raw_urls]
 
-        print(f"🚀 Sector: {sector} | URLs: {len(final_urls)}")
-        return {"reply": data['reply'], "urls": final_urls, "is_sale": data.get('is_sale', True if "cheap" in user_input else False), "sector": sector}
+        print(f"🚀 Sector: {sector} | Status: Success")
+        return {"reply": data['reply'], "urls": final_urls, "is_sale": data.get('is_sale', False)}
+
     except Exception as e:
-        print(f"❌ Error: {e}")
-        return {"reply": "Ollama Busy.", "urls": []}
+        print(f"❌ Backend Error: {e}")
+        # Fallback if Ollama is actually being slow
+        return {
+            "reply": "I'm processing your request, but the brain is a bit slow. Let me open the search for you directly.",
+            "urls": [f"https://www.google.com/search?q={urllib.parse.quote(user_input)}"],
+            "is_sale": False
+        }
 
 if __name__ == "__main__":
     import uvicorn
