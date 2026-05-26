@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI()
 
+# UNIVERSAL PERMIT: This fixes the "Offline" status
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,6 +14,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# HEALTH CHECK: Needed for the UI to see the backend as "Online"
+@app.get("/")
+async def root():
+    return {"status": "online", "agent": "SuperAgent Supersonic v4"}
 
 # FULL SECTOR MATRIX - ALL CONDITIONS
 SECTOR_MAP = {
@@ -47,7 +53,7 @@ async def process_ai(request: Request):
         final_urls = [u.format(q=urllib.parse.quote(query)) for u in raw_urls]
 
         print(f"🚀 Sector: {sector} | URLs: {len(final_urls)}")
-        return {"reply": data['reply'], "urls": final_urls, "is_sale": data.get('is_sale', False), "sector": sector}
+        return {"reply": data['reply'], "urls": final_urls, "is_sale": data.get('is_sale', True if "cheap" in user_input else False), "sector": sector}
     except Exception as e:
         print(f"❌ Error: {e}")
         return {"reply": "Ollama Busy.", "urls": []}
