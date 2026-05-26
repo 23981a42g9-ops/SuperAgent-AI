@@ -2,5 +2,5 @@ __pycache__/
 *.pyc 
 venv/ 
 .vscode/ 
-*.db 
+*.db
 .env
