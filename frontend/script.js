@@ -9,7 +9,7 @@ async function sendMessage() {
 
     appendMessage(text, "user");
     input.value = "";
-    const botMsg = appendMessage("⚡ Processing Intent...", "bot");
+    const botMsg = appendMessage("⚡ Scanning Global Networks...", "bot");
 
     try {
         const res = await fetch(API, {
@@ -23,13 +23,12 @@ async function sendMessage() {
         currentIndex = 0;
         botMsg.innerHTML = `<div class="bubble">${data.reply}</div>`;
         
-        // Final Conditions: Voice + Sale Alert + Auto Open
         speak(data.reply);
         if (data.is_sale) showSaleNotification();
         if (currentUrls.length > 0) navigateToNext();
 
     } catch (e) { 
-        botMsg.innerText = "Connection Failed. Is FastAPI & Ollama running?"; 
+        botMsg.innerText = "Error: Check if Uvicorn terminal shows activity."; 
     }
 }
 
@@ -39,7 +38,6 @@ function navigateToNext() {
         currentIndex++;
         document.getElementById("satisfactionBar").style.display = "block";
     } else {
-        appendMessage("Global scan complete. No more sites for this sector.", "bot");
         document.getElementById("satisfactionBar").style.display = "none";
     }
 }
@@ -57,7 +55,7 @@ function appendMessage(text, who) {
 function speak(t) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
-    u.lang = "en-IN"; 
+    u.lang = "en-IN";
     window.speechSynthesis.speak(u);
 }
 
@@ -67,11 +65,10 @@ function showSaleNotification() {
     setTimeout(() => n.style.display = "none", 6000);
 }
 
-// Voice Recognition
 function startVoice() {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.onresult = (event) => {
-        document.getElementById("msg").value = event.results[0][0].transcript;
+    recognition.onresult = (e) => {
+        document.getElementById("msg").value = e.results[0][0].transcript;
         sendMessage();
     };
     recognition.start();
